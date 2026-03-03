@@ -456,71 +456,153 @@ const techCategories = [
   },
 ]
 
-/* All icons for the floating background */
-const floatingIcons = [
-  SiReact, SiNodedotjs, SiMongodb, SiExpress, SiJavascript,
-  SiTypescript, SiTailwindcss, SiGit, SiGithub, SiVite,
-  SiHtml5, SiCss3, SiPython, SiCplusplus, SiMysql,
-  SiPostman, SiVercel, SiNpm, SiFigma, SiLinux,
+/* All icons for the 3D sphere */
+const sphereIcons = [
+  { Icon: SiReact, color: '#61DAFB', name: 'React' },
+  { Icon: SiNodedotjs, color: '#339933', name: 'Node.js' },
+  { Icon: SiMongodb, color: '#47A248', name: 'MongoDB' },
+  { Icon: SiExpress, color: '#888888', name: 'Express' },
+  { Icon: SiJavascript, color: '#F7DF1E', name: 'JavaScript' },
+  { Icon: SiTypescript, color: '#3178C6', name: 'TypeScript' },
+  { Icon: SiTailwindcss, color: '#06B6D4', name: 'Tailwind' },
+  { Icon: SiGit, color: '#F05032', name: 'Git' },
+  { Icon: SiGithub, color: '#aaaaaa', name: 'GitHub' },
+  { Icon: SiVite, color: '#646CFF', name: 'Vite' },
+  { Icon: SiHtml5, color: '#E34F26', name: 'HTML5' },
+  { Icon: SiCss3, color: '#1572B6', name: 'CSS3' },
+  { Icon: SiPython, color: '#3776AB', name: 'Python' },
+  { Icon: SiCplusplus, color: '#00599C', name: 'C++' },
+  { Icon: SiMysql, color: '#4479A1', name: 'MySQL' },
+  { Icon: SiPostman, color: '#FF6C37', name: 'Postman' },
+  { Icon: SiVercel, color: '#aaaaaa', name: 'Vercel' },
+  { Icon: SiNpm, color: '#CB3837', name: 'NPM' },
+  { Icon: SiFigma, color: '#F24E1E', name: 'Figma' },
+  { Icon: SiLinux, color: '#FCC624', name: 'Linux' },
 ]
 
-const FloatingLogos = memo(function FloatingLogos() {
-  const containerRef = useRef(null)
+/* Fibonacci sphere distribution for even spacing */
+function fibSphere(count, radius) {
+  const points = []
+  const goldenAngle = Math.PI * (3 - Math.sqrt(5))
+  for (let i = 0; i < count; i++) {
+    const y = 1 - (i / (count - 1)) * 2
+    const r = Math.sqrt(1 - y * y)
+    const theta = goldenAngle * i
+    points.push({
+      x: Math.cos(theta) * r * radius,
+      y: y * radius,
+      z: Math.sin(theta) * r * radius,
+    })
+  }
+  return points
+}
+
+const IconSphere = memo(function IconSphere() {
+  const sphereRef = useRef(null)
+  const iconsRef = useRef([])
+  const scrollY = useRef(0)
+  const mouse = useRef({ x: 0, y: 0 })
+  const animFrame = useRef(null)
+  const basePoints = useRef(fibSphere(sphereIcons.length, 200))
 
   useEffect(() => {
-    const logos = containerRef.current?.querySelectorAll('.floating-logo')
-    if (!logos) return
-
-    let ticking = false
-    const onScroll = () => {
-      if (ticking) return
-      ticking = true
-      requestAnimationFrame(() => {
-        const rect = containerRef.current?.getBoundingClientRect()
-        if (!rect) { ticking = false; return }
-        const scrollProgress = -rect.top / (rect.height || 1)
-        logos.forEach((logo, i) => {
-          const speed = 0.3 + (i % 5) * 0.15
-          const yOffset = scrollProgress * speed * 120
-          const rot = scrollProgress * (180 + i * 22)
-          logo.style.transform = `translateY(${yOffset}px) rotateY(${rot}deg) rotateX(${rot * 0.4}deg)`
-        })
-        ticking = false
-      })
+    const onScroll = () => { scrollY.current = window.scrollY }
+    const onMouse = (e) => {
+      mouse.current.x = (e.clientX / window.innerWidth - 0.5) * 2
+      mouse.current.y = (e.clientY / window.innerHeight - 0.5) * 2
     }
+
     window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
+    window.addEventListener('mousemove', onMouse, { passive: true })
+
+    let prev = performance.now()
+
+    const animate = (now) => {
+      const container = sphereRef.current
+      if (!container) { animFrame.current = requestAnimationFrame(animate); return }
+
+      const rect = container.getBoundingClientRect()
+      const viewH = window.innerHeight
+      const sectionProgress = Math.max(0, Math.min(1, (viewH - rect.top) / (viewH + rect.height)))
+
+      /* Scroll drives main rotation */
+      const scrollRot = scrollY.current * 0.15
+      const tiltX = mouse.current.y * 12
+      const tiltY = mouse.current.x * 12
+
+      /* Breathing / pulsing scale */
+      const breathe = 1 + Math.sin(now * 0.0008) * 0.04
+
+      /* Explosion factor — icons spread out as you scroll through */
+      const explode = 1 + sectionProgress * 0.6
+
+      const points = basePoints.current
+
+      iconsRef.current.forEach((el, i) => {
+        if (!el) return
+        const p = points[i]
+
+        /* Rotate point around Y axis based on scroll */
+        const angle = (scrollRot + i * 3) * (Math.PI / 180)
+        const cosA = Math.cos(angle)
+        const sinA = Math.sin(angle)
+        const rx = p.x * cosA - p.z * sinA
+        const rz = p.x * sinA + p.z * cosA
+        const ry = p.y
+
+        /* Apply explosion + breathe */
+        const fx = rx * explode * breathe
+        const fy = ry * explode * breathe
+        const fz = rz * explode * breathe
+
+        /* Depth-based scaling & opacity */
+        const depthScale = (fz + 300) / 500
+        const scale = Math.max(0.35, Math.min(1.3, depthScale))
+        const opacity = Math.max(0.15, Math.min(1, depthScale * 0.9))
+        const zIdx = Math.round(fz + 300)
+
+        /* Each icon flips based on its own scroll phase */
+        const flipX = scrollRot * 1.2 + i * 18
+        const flipY = scrollRot * 0.8 + i * 25
+
+        el.style.transform = `translate3d(${fx}px, ${fy}px, ${fz}px) rotateX(${flipX}deg) rotateY(${flipY}deg) scale(${scale})`
+        el.style.opacity = opacity
+        el.style.zIndex = zIdx
+      })
+
+      /* Whole sphere subtle tilt from mouse */
+      container.style.transform = `rotateX(${tiltX}deg) rotateY(${tiltY}deg)`
+
+      animFrame.current = requestAnimationFrame(animate)
+    }
+
+    animFrame.current = requestAnimationFrame(animate)
+
+    return () => {
+      window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('mousemove', onMouse)
+      if (animFrame.current) cancelAnimationFrame(animFrame.current)
+    }
   }, [])
 
-  /* Deterministic positions spread across the card */
-  const positions = [
-    { top: '5%', left: '3%' }, { top: '8%', left: '88%' },
-    { top: '18%', left: '12%' }, { top: '14%', left: '72%' },
-    { top: '28%', left: '90%' }, { top: '35%', left: '5%' },
-    { top: '42%', left: '80%' }, { top: '50%', left: '15%' },
-    { top: '55%', left: '92%' }, { top: '62%', left: '2%' },
-    { top: '68%', left: '85%' }, { top: '72%', left: '10%' },
-    { top: '78%', left: '75%' }, { top: '82%', left: '20%' },
-    { top: '88%', left: '88%' }, { top: '92%', left: '6%' },
-    { top: '25%', left: '55%' }, { top: '45%', left: '45%' },
-    { top: '65%', left: '60%' }, { top: '85%', left: '40%' },
-  ]
-
   return (
-    <div className="floating-logos" ref={containerRef} aria-hidden="true">
-      {floatingIcons.map((Icon, i) => (
-        <div
-          key={i}
-          className="floating-logo"
-          style={{
-            top: positions[i].top,
-            left: positions[i].left,
-            animationDelay: `${i * 0.3}s`,
-          }}
-        >
-          <Icon />
-        </div>
-      ))}
+    <div className="icon-sphere-wrapper" aria-hidden="true">
+      <div className="icon-sphere" ref={sphereRef}>
+        {sphereIcons.map((item, i) => {
+          const Icon = item.Icon
+          return (
+            <div
+              key={i}
+              className="sphere-icon"
+              ref={(el) => (iconsRef.current[i] = el)}
+              style={{ '--icon-color': item.color }}
+            >
+              <Icon />
+              <span className="sphere-icon-label">{item.name}</span>
+            </div>
+          )
+        })}
+      </div>
     </div>
   )
 })
@@ -528,7 +610,6 @@ const FloatingLogos = memo(function FloatingLogos() {
 const TechStackCard = memo(function TechStackCard() {
   return (
     <div className="techstack-content">
-      <FloatingLogos />
       <div className="techstack-header">
         <span className="card-label">Skills &amp; Expertise</span>
         <h2 className="techstack-title">Tech Stack</h2>
@@ -536,6 +617,8 @@ const TechStackCard = memo(function TechStackCard() {
           Technologies I work with daily &#8212; from interfaces to infrastructure.
         </p>
       </div>
+
+      <IconSphere />
 
       <div className="techstack-categories">
         {techCategories.map((cat) => (
