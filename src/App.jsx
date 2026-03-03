@@ -558,7 +558,7 @@ const IconSphere = memo(function IconSphere() {
         /* Depth-based scaling & opacity */
         const depthScale = (fz + 300) / 500
         const scale = Math.max(0.35, Math.min(1.3, depthScale))
-        const opacity = Math.max(0.15, Math.min(1, depthScale * 0.9))
+        const opacity = Math.max(0.4, Math.min(1, depthScale * 1.1))
         const zIdx = Math.round(fz + 300)
 
         /* Each icon flips based on its own scroll phase */
@@ -647,6 +647,64 @@ const TechStackCard = memo(function TechStackCard() {
           </div>
         ))}
       </div>
+    </div>
+  )
+})
+
+/* ===== GLOBAL ROTATING ICONS BACKGROUND ===== */
+const bgIcons = [
+  SiReact, SiNodedotjs, SiMongodb, SiJavascript, SiTypescript,
+  SiTailwindcss, SiGit, SiVite, SiHtml5, SiCss3,
+  SiPython, SiCplusplus, SiPostman, SiVercel, SiFigma,
+  SiLinux, SiNpm, SiGithub, SiMysql, SiExpress,
+  SiReact, SiNodedotjs, SiMongodb, SiJavascript, SiTypescript,
+  SiTailwindcss, SiGit, SiVite, SiHtml5, SiCss3,
+]
+
+const GlobalIconsBg = memo(function GlobalIconsBg() {
+  const containerRef = useRef(null)
+
+  useEffect(() => {
+    const icons = containerRef.current?.querySelectorAll('.gbg-icon')
+    if (!icons) return
+
+    let ticking = false
+    const onScroll = () => {
+      if (ticking) return
+      ticking = true
+      requestAnimationFrame(() => {
+        const sy = window.scrollY
+        icons.forEach((icon, i) => {
+          const speed = 0.02 + (i % 6) * 0.012
+          const yOff = sy * speed
+          const rot = sy * (0.06 + (i % 4) * 0.02) + i * 30
+          icon.style.transform = `translateY(${yOff}px) rotate(${rot}deg) scale(${0.8 + Math.sin(sy * 0.001 + i) * 0.2})`
+        })
+        ticking = false
+      })
+    }
+    window.addEventListener('scroll', onScroll, { passive: true })
+    onScroll()
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
+  /* Spread icons across a tall area */
+  const positions = bgIcons.map((_, i) => ({
+    top: `${(i / bgIcons.length) * 100}%`,
+    left: `${10 + ((i * 37 + i * i * 13) % 80)}%`,
+  }))
+
+  return (
+    <div className="global-icons-bg" ref={containerRef} aria-hidden="true">
+      {bgIcons.map((Icon, i) => (
+        <div
+          key={i}
+          className="gbg-icon"
+          style={{ top: positions[i].top, left: positions[i].left, animationDelay: `${(i * 0.7) % 8}s` }}
+        >
+          <Icon />
+        </div>
+      ))}
     </div>
   )
 })
@@ -773,6 +831,9 @@ export default function App() {
 
       {/* Theme toggle */}
       <ThemeToggle theme={theme} toggle={toggleTheme} />
+
+      {/* Global rotating icons background */}
+      <GlobalIconsBg />
 
       <main>
         {cards.map(({ Component, className }, i) => (
