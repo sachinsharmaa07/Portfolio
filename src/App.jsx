@@ -1,6 +1,14 @@
 import { useEffect, useRef, useState, memo, useCallback } from 'react'
 import Lenis from 'lenis'
 
+/* ===== REACT ICONS ===== */
+import {
+  SiReact, SiNodedotjs, SiMongodb, SiExpress, SiJavascript,
+  SiTypescript, SiTailwindcss, SiGit, SiGithub, SiVite,
+  SiHtml5, SiCss3, SiPython, SiCplusplus, SiMysql,
+  SiPostman, SiVercel, SiNpm, SiFigma, SiLinux
+} from 'react-icons/si'
+
 /* ===== COUNTER HOOK ===== */
 function useCounter(target, duration = 2200) {
   const [count, setCount] = useState(0)
@@ -409,12 +417,164 @@ const ContactCard = memo(function ContactCard() {
   )
 })
 
+/* ===== TECH STACK CARD ===== */
+const techCategories = [
+  {
+    category: 'Frontend',
+    techs: [
+      { name: 'React', icon: SiReact, color: '#61DAFB', link: 'https://react.dev' },
+      { name: 'JavaScript', icon: SiJavascript, color: '#F7DF1E', link: 'https://developer.mozilla.org/en-US/docs/Web/JavaScript' },
+      { name: 'TypeScript', icon: SiTypescript, color: '#3178C6', link: 'https://www.typescriptlang.org' },
+      { name: 'HTML5', icon: SiHtml5, color: '#E34F26', link: 'https://developer.mozilla.org/en-US/docs/Web/HTML' },
+      { name: 'CSS3', icon: SiCss3, color: '#1572B6', link: 'https://developer.mozilla.org/en-US/docs/Web/CSS' },
+      { name: 'Tailwind CSS', icon: SiTailwindcss, color: '#06B6D4', link: 'https://tailwindcss.com' },
+    ],
+  },
+  {
+    category: 'Backend',
+    techs: [
+      { name: 'Node.js', icon: SiNodedotjs, color: '#339933', link: 'https://nodejs.org' },
+      { name: 'Express', icon: SiExpress, color: '#888888', link: 'https://expressjs.com' },
+      { name: 'MongoDB', icon: SiMongodb, color: '#47A248', link: 'https://www.mongodb.com' },
+      { name: 'MySQL', icon: SiMysql, color: '#4479A1', link: 'https://www.mysql.com' },
+      { name: 'Python', icon: SiPython, color: '#3776AB', link: 'https://www.python.org' },
+      { name: 'C++', icon: SiCplusplus, color: '#00599C', link: 'https://isocpp.org' },
+    ],
+  },
+  {
+    category: 'Tools & Platforms',
+    techs: [
+      { name: 'Git', icon: SiGit, color: '#F05032', link: 'https://git-scm.com' },
+      { name: 'GitHub', icon: SiGithub, color: '#aaa', link: 'https://github.com' },
+      { name: 'Vite', icon: SiVite, color: '#646CFF', link: 'https://vitejs.dev' },
+      { name: 'Postman', icon: SiPostman, color: '#FF6C37', link: 'https://www.postman.com' },
+      { name: 'Vercel', icon: SiVercel, color: '#aaa', link: 'https://vercel.com' },
+      { name: 'NPM', icon: SiNpm, color: '#CB3837', link: 'https://www.npmjs.com' },
+      { name: 'Figma', icon: SiFigma, color: '#F24E1E', link: 'https://www.figma.com' },
+      { name: 'Linux', icon: SiLinux, color: '#FCC624', link: 'https://www.linux.org' },
+    ],
+  },
+]
+
+/* All icons for the floating background */
+const floatingIcons = [
+  SiReact, SiNodedotjs, SiMongodb, SiExpress, SiJavascript,
+  SiTypescript, SiTailwindcss, SiGit, SiGithub, SiVite,
+  SiHtml5, SiCss3, SiPython, SiCplusplus, SiMysql,
+  SiPostman, SiVercel, SiNpm, SiFigma, SiLinux,
+]
+
+const FloatingLogos = memo(function FloatingLogos() {
+  const containerRef = useRef(null)
+
+  useEffect(() => {
+    const logos = containerRef.current?.querySelectorAll('.floating-logo')
+    if (!logos) return
+
+    let ticking = false
+    const onScroll = () => {
+      if (ticking) return
+      ticking = true
+      requestAnimationFrame(() => {
+        const rect = containerRef.current?.getBoundingClientRect()
+        if (!rect) { ticking = false; return }
+        const scrollProgress = -rect.top / (rect.height || 1)
+        logos.forEach((logo, i) => {
+          const speed = 0.3 + (i % 5) * 0.15
+          const yOffset = scrollProgress * speed * 120
+          const rot = scrollProgress * (180 + i * 22)
+          logo.style.transform = `translateY(${yOffset}px) rotateY(${rot}deg) rotateX(${rot * 0.4}deg)`
+        })
+        ticking = false
+      })
+    }
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
+  /* Deterministic positions spread across the card */
+  const positions = [
+    { top: '5%', left: '3%' }, { top: '8%', left: '88%' },
+    { top: '18%', left: '12%' }, { top: '14%', left: '72%' },
+    { top: '28%', left: '90%' }, { top: '35%', left: '5%' },
+    { top: '42%', left: '80%' }, { top: '50%', left: '15%' },
+    { top: '55%', left: '92%' }, { top: '62%', left: '2%' },
+    { top: '68%', left: '85%' }, { top: '72%', left: '10%' },
+    { top: '78%', left: '75%' }, { top: '82%', left: '20%' },
+    { top: '88%', left: '88%' }, { top: '92%', left: '6%' },
+    { top: '25%', left: '55%' }, { top: '45%', left: '45%' },
+    { top: '65%', left: '60%' }, { top: '85%', left: '40%' },
+  ]
+
+  return (
+    <div className="floating-logos" ref={containerRef} aria-hidden="true">
+      {floatingIcons.map((Icon, i) => (
+        <div
+          key={i}
+          className="floating-logo"
+          style={{
+            top: positions[i].top,
+            left: positions[i].left,
+            animationDelay: `${i * 0.3}s`,
+          }}
+        >
+          <Icon />
+        </div>
+      ))}
+    </div>
+  )
+})
+
+const TechStackCard = memo(function TechStackCard() {
+  return (
+    <div className="techstack-content">
+      <FloatingLogos />
+      <div className="techstack-header">
+        <span className="card-label">Skills &amp; Expertise</span>
+        <h2 className="techstack-title">Tech Stack</h2>
+        <p className="techstack-desc">
+          Technologies I work with daily &#8212; from interfaces to infrastructure.
+        </p>
+      </div>
+
+      <div className="techstack-categories">
+        {techCategories.map((cat) => (
+          <div key={cat.category} className="techstack-category">
+            <h3 className="techstack-cat-name">{cat.category}</h3>
+            <div className="techstack-grid">
+              {cat.techs.map((tech) => {
+                const Icon = tech.icon
+                return (
+                  <a
+                    key={tech.name}
+                    href={tech.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="techstack-item"
+                    style={{ '--tech-color': tech.color }}
+                  >
+                    <div className="techstack-icon-wrap">
+                      <Icon className="techstack-icon" />
+                    </div>
+                    <span className="techstack-name">{tech.name}</span>
+                  </a>
+                )
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+})
+
 /* ===== MAIN APP ===== */
 const cards = [
   { Component: HeroCard, className: 'card--hero' },
   { Component: AkhadaCard, className: 'card--akhada' },
   { Component: SimulatorCard, className: 'card--sim' },
   { Component: MoreProjectsCard, className: 'card--projects' },
+  { Component: TechStackCard, className: 'card--techstack' },
   { Component: PhilosophyCard, className: 'card--philosophy' },
   { Component: ContactCard, className: 'card--contact' },
 ]

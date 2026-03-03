@@ -564,6 +564,205 @@ img { display: block; max-width: 100%; }
 .sim-status--fault { color: var(--accent); background: var(--accent-glow); }
 .sim-status--hit { color: var(--hit-color); background: var(--hit-bg); }
 
+/* TECH STACK CARD */
+.card--techstack {
+  max-width: 940px;
+  overflow: hidden;
+  position: relative;
+}
+
+.techstack-content { position: relative; z-index: 2; }
+
+/* Floating Background Logos */
+.floating-logos {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.floating-logo {
+  position: absolute;
+  font-size: 1.6rem;
+  color: var(--accent);
+  opacity: 0.045;
+  transition: transform 0.1s linear;
+  will-change: transform;
+  perspective: 600px;
+  transform-style: preserve-3d;
+  animation: floatDrift 14s ease-in-out infinite alternate;
+}
+
+.floating-logo svg {
+  width: 28px;
+  height: 28px;
+}
+
+@keyframes floatDrift {
+  0% { translate: 0 0; }
+  25% { translate: 6px -8px; }
+  50% { translate: -4px 5px; }
+  75% { translate: 8px 3px; }
+  100% { translate: -3px -6px; }
+}
+
+[data-theme='light'] .floating-logo { opacity: 0.06; }
+
+/* Header */
+.techstack-header {
+  margin-bottom: 2.5rem;
+  position: relative;
+  z-index: 2;
+}
+
+.techstack-title {
+  font-size: clamp(1.85rem, 4.5vw, 2.8rem);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  margin-bottom: 0.75rem;
+}
+
+.techstack-desc {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  max-width: 520px;
+  line-height: 1.8;
+}
+
+/* Categories */
+.techstack-categories {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  position: relative;
+  z-index: 2;
+}
+
+.techstack-cat-name {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+/* Grid */
+.techstack-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 0.75rem;
+}
+
+/* Individual Tech Item */
+.techstack-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 1.15rem 0.75rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 400ms var(--ease);
+  perspective: 600px;
+  text-decoration: none;
+}
+
+.techstack-item:hover {
+  border-color: var(--tech-color, var(--accent));
+  background: var(--surface-hover);
+  transform: translateY(-4px) scale(1.03);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12), 0 0 0 1px var(--tech-color, var(--accent));
+}
+
+.techstack-item:active { transform: scale(0.97); }
+
+/* Icon wrapper with flip */
+.techstack-icon-wrap {
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  transition: all 500ms var(--ease);
+  transform-style: preserve-3d;
+}
+
+.techstack-item:hover .techstack-icon-wrap {
+  background: transparent;
+  border-color: transparent;
+  transform: rotateY(360deg);
+}
+
+.techstack-icon {
+  width: 24px;
+  height: 24px;
+  color: var(--text-muted);
+  transition: color 400ms var(--ease);
+}
+
+.techstack-item:hover .techstack-icon {
+  color: var(--tech-color, var(--accent));
+}
+
+.techstack-name {
+  font-size: 0.76rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  letter-spacing: 0.01em;
+  transition: color 300ms ease;
+  text-align: center;
+}
+
+.techstack-item:hover .techstack-name {
+  color: var(--text);
+}
+
+/* Scroll-triggered card-level flip for revealed state */
+.card--techstack.card--revealed .techstack-item {
+  animation: techReveal 700ms var(--ease) backwards;
+}
+
+.card--techstack.card--revealed .techstack-category:nth-child(1) .techstack-item:nth-child(1) { animation-delay: 0ms; }
+.card--techstack.card--revealed .techstack-category:nth-child(1) .techstack-item:nth-child(2) { animation-delay: 60ms; }
+.card--techstack.card--revealed .techstack-category:nth-child(1) .techstack-item:nth-child(3) { animation-delay: 120ms; }
+.card--techstack.card--revealed .techstack-category:nth-child(1) .techstack-item:nth-child(4) { animation-delay: 180ms; }
+.card--techstack.card--revealed .techstack-category:nth-child(1) .techstack-item:nth-child(5) { animation-delay: 240ms; }
+.card--techstack.card--revealed .techstack-category:nth-child(1) .techstack-item:nth-child(6) { animation-delay: 300ms; }
+.card--techstack.card--revealed .techstack-category:nth-child(2) .techstack-item:nth-child(1) { animation-delay: 360ms; }
+.card--techstack.card--revealed .techstack-category:nth-child(2) .techstack-item:nth-child(2) { animation-delay: 420ms; }
+.card--techstack.card--revealed .techstack-category:nth-child(2) .techstack-item:nth-child(3) { animation-delay: 480ms; }
+.card--techstack.card--revealed .techstack-category:nth-child(2) .techstack-item:nth-child(4) { animation-delay: 540ms; }
+.card--techstack.card--revealed .techstack-category:nth-child(2) .techstack-item:nth-child(5) { animation-delay: 600ms; }
+.card--techstack.card--revealed .techstack-category:nth-child(2) .techstack-item:nth-child(6) { animation-delay: 660ms; }
+.card--techstack.card--revealed .techstack-category:nth-child(3) .techstack-item:nth-child(1) { animation-delay: 720ms; }
+.card--techstack.card--revealed .techstack-category:nth-child(3) .techstack-item:nth-child(2) { animation-delay: 780ms; }
+.card--techstack.card--revealed .techstack-category:nth-child(3) .techstack-item:nth-child(3) { animation-delay: 840ms; }
+.card--techstack.card--revealed .techstack-category:nth-child(3) .techstack-item:nth-child(4) { animation-delay: 900ms; }
+.card--techstack.card--revealed .techstack-category:nth-child(3) .techstack-item:nth-child(5) { animation-delay: 960ms; }
+.card--techstack.card--revealed .techstack-category:nth-child(3) .techstack-item:nth-child(6) { animation-delay: 1020ms; }
+.card--techstack.card--revealed .techstack-category:nth-child(3) .techstack-item:nth-child(7) { animation-delay: 1080ms; }
+.card--techstack.card--revealed .techstack-category:nth-child(3) .techstack-item:nth-child(8) { animation-delay: 1140ms; }
+
+@keyframes techReveal {
+  0% {
+    opacity: 0;
+    transform: translateY(20px) rotateX(45deg) scale(0.85);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) rotateX(0) scale(1);
+  }
+}
+
 /* PHILOSOPHY CARD */
 .card--philosophy {
   display: flex;
@@ -677,6 +876,11 @@ img { display: block; max-width: 100%; }
   .contact-link { padding: 1.25rem 1rem; min-width: 80px; }
   .contact-link svg { width: 26px; height: 26px; }
   .akhada-links, .sim-links { flex-wrap: wrap; }
+  .techstack-grid { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 0.6rem; }
+  .techstack-item { padding: 0.9rem 0.5rem; }
+  .techstack-icon-wrap { width: 36px; height: 36px; }
+  .techstack-icon { width: 20px; height: 20px; }
+  .floating-logo svg { width: 22px; height: 22px; }
 }
 
 @media (max-width: 480px) {
@@ -688,4 +892,7 @@ img { display: block; max-width: 100%; }
   .philosophy-quote { font-size: 1.1rem; }
   .contact-link { min-width: 70px; }
   .contact-link svg { width: 22px; height: 22px; }
+  .techstack-grid { grid-template-columns: repeat(3, 1fr); }
+  .techstack-title { font-size: 1.6rem; }
+  .floating-logo svg { width: 18px; height: 18px; }
 }
