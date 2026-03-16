@@ -78,6 +78,7 @@ function App() {
   const [statsStarted, setStatsStarted] = useState(false)
   const [barsAnimated, setBarsAnimated] = useState(false)
   const [stats, setStats] = useState({ projects: 0, leetcode: 0, cgpa: 0, certs: 0 })
+  const [contactForm, setContactForm] = useState({ name: '', email: '', cc: '', message: '' })
 
   const sectionIds = useMemo(() => ['about', 'skills', 'projects', 'education', 'contact'], [])
 
@@ -386,6 +387,35 @@ function App() {
     frameId = requestAnimationFrame(tick)
     return () => cancelAnimationFrame(frameId)
   }, [statsStarted])
+
+  const handleContactChange = (event) => {
+    const { name, value } = event.target
+    setContactForm((prev) => ({ ...prev, [name]: value }))
+  }
+
+  const handleContactSubmit = (event) => {
+    event.preventDefault()
+    const recipient = 'studentgroup479@gmail.com'
+    const subject = `Portfolio Contact from ${contactForm.name.trim()}`
+    const body = [
+      `Name: ${contactForm.name.trim()}`,
+      `Email: ${contactForm.email.trim()}`,
+      '',
+      'Message:',
+      contactForm.message.trim(),
+    ].join('\n')
+
+    const params = new URLSearchParams({
+      subject,
+      body,
+    })
+
+    if (contactForm.cc.trim()) {
+      params.set('cc', contactForm.cc.trim())
+    }
+
+    window.location.href = `mailto:${recipient}?${params.toString()}`
+  }
 
   return (
     <>
@@ -720,6 +750,41 @@ function App() {
                 <a href="https://www.linkedin.com/in/sachinsharmaa07/" target="_blank" rel="noopener noreferrer">
                   🔗 linkedin.com/in/sachinsharmaa07
                 </a>
+
+                <form className="contact-form" onSubmit={handleContactSubmit}>
+                  <input
+                    type="text"
+                    name="name"
+                    placeholder="Your Name"
+                    value={contactForm.name}
+                    onChange={handleContactChange}
+                    required
+                  />
+                  <input
+                    type="email"
+                    name="email"
+                    placeholder="Your Email"
+                    value={contactForm.email}
+                    onChange={handleContactChange}
+                    required
+                  />
+                  <input
+                    type="email"
+                    name="cc"
+                    placeholder="CC Email (optional)"
+                    value={contactForm.cc}
+                    onChange={handleContactChange}
+                  />
+                  <textarea
+                    name="message"
+                    placeholder="Your Message"
+                    value={contactForm.message}
+                    onChange={handleContactChange}
+                    rows={4}
+                    required
+                  />
+                  <button type="submit">Send Email</button>
+                </form>
 
                 <div className="social-grid">
                   <a href="https://github.com/sachinsharmaa07" target="_blank" rel="noopener noreferrer">
