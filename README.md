@@ -66,9 +66,15 @@ vercel --prod     # Deploy to production
 2. Add your domain and update DNS records as shown
 3. SSL is automatic
 
-## Replacing the CV
+## Required Assets
 
-Drop your updated PDF into `public/Sachin_Kumar_CV.pdf` (keep the same filename) and redeploy.
+Place these files exactly here before building/deploying:
+
+- `public/assets/CV_Sachin_Sharma.pdf`
+- `public/assets/CV_Sachin_Sharma.docx`
+- `public/assets/sachin.png` (profile image)
+
+The app now provides both open and download links for PDF + DOCX CV files.
 
 ## Build Output
 
