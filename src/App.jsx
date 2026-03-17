@@ -624,7 +624,7 @@ function App() {
                     <a href="https://github.com/sachinsharmaa07/Akhada-Anlaytics" target="_blank" rel="noopener noreferrer">
                       ⌥ Code ↗
                     </a>
-                    <a href="https://akhada-anlaytics.vercel.app/" target="_blank" rel="noopener noreferrer">
+                    <a href="https://akhada-analytics.vercel.app/login" target="_blank" rel="noopener noreferrer">
                       ↗ Live
                     </a>
                   </div>
