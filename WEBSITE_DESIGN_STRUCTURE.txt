@@ -1,0 +1,344 @@
+WEBSITE DESIGN STRUCTURE (DETAILED)
+Project: Sachin Kumar Portfolio
+Stack: React + Vite + CSS + React Icons
+
+====================================================================
+1) HIGH-LEVEL OVERVIEW
+====================================================================
+This portfolio website is a single-page application (SPA) built with React.
+It uses one main component (`App.jsx`) that renders all sections of the site:
+
+1. Hero
+2. About
+3. Skills
+4. Projects
+5. Education
+6. Contact
+
+The site follows a section-based layout with anchor navigation (`#about`, `#skills`, etc.).
+It combines:
+- A fixed responsive navbar
+- A full-screen animated icon background canvas
+- Reveal animations on scroll
+- Animated stats and skill bars when sections enter viewport
+- Mobile menu for small screens
+- Contact form that opens default email client via `mailto:`
+
+====================================================================
+2) PROJECT/FOLDER STRUCTURE AND PURPOSE
+====================================================================
+Root Files:
+- index.html
+  Entry HTML file containing the app root element where React mounts.
+
+- package.json
+  Defines scripts and dependencies.
+  Important scripts:
+  - npm run dev       -> starts Vite dev server
+  - npm run build     -> production build
+  - npm run preview   -> preview production build
+  - npm run check:assets -> checks required assets before build
+
+- vite.config.js
+  Minimal Vite config using React plugin.
+
+- vercel.json
+  Deployment settings for Vercel (project hosting config).
+
+- README.md
+  Project usage, stack info, deployment instructions, and required assets list.
+
+Folders:
+- src/
+  - main.jsx
+    React entry point. Imports App and index.css, then mounts App into #root.
+
+  - App.jsx
+    Core application file. Contains all UI sections, data arrays, state, effects,
+    event handlers, and animation logic.
+
+  - index.css
+    Full styling system: color variables, layout, spacing, cards, buttons,
+    animations, responsive breakpoints.
+
+- public/assets/
+  Static assets such as CV files and image resources.
+
+- scripts/check-required-assets.mjs
+  Validates required files exist before production build.
+
+====================================================================
+3) RENDER FLOW (HOW WEBSITE IS CREATED ON LOAD)
+====================================================================
+Step 1: Browser loads `index.html`
+Step 2: Vite bundles and serves React code
+Step 3: `src/main.jsx` runs and mounts `<App />` into DOM root
+Step 4: `App` initial render shows layout + default states
+Step 5: React `useEffect` hooks start interactive behaviors:
+        - typewriter role animation
+        - canvas icon animation engine
+        - scroll state updates (navbar + back-to-top)
+        - reveal/intersection observers
+        - active section tracking
+        - stats counter animation trigger
+        - skill bar animation trigger
+
+====================================================================
+4) APP.JSX DESIGN STRUCTURE (CORE LOGIC)
+====================================================================
+A) Static Data Definitions
+--------------------------
+1. roles[]
+   Role names used by typewriter effect in hero section.
+
+2. iconSources[]
+   External icon URLs (JS, React, Node, MongoDB, Docker, etc.) rendered as floating
+   particles in canvas background.
+
+3. skillsMap
+   Organized skill categories:
+   - Languages
+   - Frameworks
+   - Tools
+   - Soft Skills
+   Values drive dynamic rendering of skill cards and progress bars.
+
+B) State and Refs
+-----------------
+1. Refs:
+   - canvasRef: DOM reference to background canvas.
+   - roleIndexRef / charIndexRef / deletingRef: mutable controls for typewriter loop.
+
+2. State:
+   - typedRole: currently displayed role text.
+   - scrolled: toggles navbar scrolled style.
+   - menuOpen: mobile menu visibility.
+   - activeSection: currently viewed section, used to highlight nav item.
+   - showTop: toggles back-to-top button visibility.
+   - statsStarted: starts stats counting animation once stats area is visible.
+   - barsAnimated: starts skill bar fill animation when skills section is visible.
+   - stats: animated numeric values (projects, leetcode, cgpa, certs).
+   - contactForm: controlled form fields (name, email, cc, message).
+
+C) Effects/Behaviors
+--------------------
+1. Typewriter effect
+   Cycles through `roles[]` by typing and deleting characters with timed delays.
+
+2. Canvas icon particle system
+   - Loads icons from `iconSources`.
+   - Creates particle class instances with randomized speed, size, opacity, and motion.
+   - Applies wobble, scroll-based parallax, mouse-repel interaction, and section-based
+     opacity multiplier.
+   - Uses `requestAnimationFrame` loop for smooth animation.
+
+3. Scroll state effect
+   - `scrolled = true` when window scroll > 50.
+   - `showTop = true` when window scroll > 400.
+
+4. Reveal observer
+   Watches `.reveal` elements and adds `.visible` class when in viewport.
+   Also applies stagger delay to `.stagger` children for sequential entrance feel.
+
+5. Active section observer
+   Watches sections by ID and updates `activeSection` when threshold is met.
+   Navbar link for current section becomes active.
+
+6. Stats + skill trigger observer
+   Starts numeric counters when stats grid enters view.
+   Starts skill fill bars when skills section enters view.
+
+7. Stats animation
+   Uses easing function over 1800ms to animate target values smoothly.
+
+D) Event Handlers
+-----------------
+1. handleContactChange
+   Updates controlled form data on input change.
+
+2. handleContactSubmit
+   Constructs `mailto:` URL with recipient, dynamic subject/body, optional CC,
+   then redirects browser to default mail client.
+
+====================================================================
+5) UI SECTION-BY-SECTION STRUCTURE
+====================================================================
+1) Header/Navbar (Fixed)
+- Left: logo badge
+- Center/Desktop: nav links generated from section ID list
+- Right/Desktop: CV download button
+- Mobile: hamburger toggle + slide-down mobile menu
+
+2) Hero Section
+- Badge + large gradient name + typewriter role text
+- Subtitle + CTA button to Projects section
+- Social links (GitHub, LinkedIn, LeetCode)
+- Scroll-down arrow animation
+
+3) About Section
+- About card with personal summary and availability badge
+- Stats grid with animated counters
+
+4) Skills Section
+- Intro text
+- 3-column skills layout (Languages/Frameworks/Tools)
+- Each skill has name + percentage + animated progress bar
+- Separate soft-skills chip panel
+
+5) Projects Section
+- Grid of project cards
+- Each card includes:
+  - date
+  - title
+  - summary paragraph
+  - bullet highlights (example: "Interactive Muscle Heatmap with 7-day frequency visualization and automatic personal record detection.")
+  - tech stack pills
+  - external links (code/live)
+
+6) Education Section
+- Timeline cards with vertical line and timeline dots
+- Certifications grid with optional certificate links
+- Achievements list with profile links
+
+7) Contact Section
+- Email, phone, LinkedIn quick links
+- Controlled contact form fields
+- Submit via email client
+- Social grid buttons
+
+8) Footer + Utility
+- Footer text with name/year
+- Back-to-top floating button with smooth scroll to top
+
+====================================================================
+6) CSS DESIGN SYSTEM (INDEX.CSS)
+====================================================================
+A) Token-Based Theme Variables
+------------------------------
+Defined in `:root` for consistent styling:
+- Background palette
+- Accent colors (blue/purple/cyan/green)
+- Typography colors
+- Border opacities
+- Radius scales
+
+B) Global Style Foundation
+--------------------------
+- Box-sizing reset
+- Smooth scroll behavior
+- Dark UI base background
+- Shared `.container` width rules
+
+C) Visual Language
+------------------
+- Glassmorphism-like card surfaces using translucent backgrounds + blur
+- Gradient accents on headings/buttons/highlight lines
+- Rounded card/button/chip geometry
+- Light glow shadows for interactive elements
+
+D) Motion and Animation Patterns
+--------------------------------
+- Logo shine animation
+- Hero text gradient shift
+- Cursor blink
+- Scroll arrow bounce
+- Pulse dot effect
+- Reveal-up entrance (`.reveal` + `.visible`)
+- Hover lift and border highlight transitions
+
+E) Layout Techniques
+--------------------
+- CSS Grid for cards and section internals
+- Flexbox for pills, chips, and inline controls
+- Section divider lines for visual separation
+
+F) Responsive Breakpoints
+-------------------------
+1. <=1024px:
+   - Projects/Certifications from 3 columns to 2
+   - Timeline converts from centered line to left-aligned layout
+
+2. <=767px:
+   - Desktop nav and CV button hidden
+   - Mobile menu enabled
+   - Main grids collapse to single column
+   - Section padding and floating button position reduced for smaller screens
+
+====================================================================
+7) TECHNOLOGIES USED AND WHY
+====================================================================
+1. React 18
+   Component-based rendering, state/effect lifecycle, easy dynamic UI updates.
+
+2. Vite 5
+   Fast development server and optimized production build process.
+
+3. react-icons
+   Provides social and technology icons as lightweight React components.
+
+4. Native Canvas API
+   Used for high-performance floating icon background animation independent
+   from regular DOM elements.
+
+5. IntersectionObserver API
+   Efficient scroll-triggered animations without expensive continuous checks.
+
+6. URLSearchParams + mailto protocol
+   Builds structured email draft from contact form values.
+
+7. Pure CSS (no UI framework)
+   Full custom visual identity and animation control.
+
+====================================================================
+8) INTERACTION + UX LOGIC SUMMARY
+====================================================================
+- Navigation:
+  Click nav links -> smooth jump to section anchors.
+  Active section highlight updates while scrolling.
+
+- Motion:
+  Content reveals as user scrolls.
+  Counters and skill bars animate only when seen (performance + engagement).
+
+- Responsiveness:
+  Desktop and mobile menus differ for better usability.
+  Grids progressively collapse to maintain readability.
+
+- Contact:
+  No backend form API required; uses user email client directly.
+
+====================================================================
+9) BUILD + DEPLOYMENT STRUCTURE
+====================================================================
+Local development:
+- npm install
+- npm run dev
+
+Build pipeline:
+- prebuild runs required asset check
+- vite build generates optimized static files in `dist/`
+
+Deployment:
+- Vercel hosting with Git integration or CLI deploy.
+- Suitable for static SPA hosting.
+
+====================================================================
+10) MAINTENANCE NOTES
+====================================================================
+To update content quickly:
+- Edit arrays/objects in `App.jsx` (roles, skills, project entries).
+
+To update appearance:
+- Modify theme tokens and section styles in `index.css`.
+
+To add a new section:
+- Add section JSX in `App.jsx`
+- Add new ID into `sectionIds` for navigation highlighting
+- Add related CSS and reveal classes if needed
+
+To optimize performance further:
+- Reduce icon particle count on low-end devices
+- Host icon assets locally to reduce third-party network dependency
+- Lazy-load large optional assets
+
+End of document.

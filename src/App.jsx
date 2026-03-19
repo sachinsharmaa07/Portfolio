@@ -67,6 +67,7 @@ const skillsMap = {
 
 function App() {
   const canvasRef = useRef(null)
+  const activeSectionRef = useRef('about')
   const roleIndexRef = useRef(0)
   const charIndexRef = useRef(0)
   const deletingRef = useRef(false)
@@ -77,8 +78,11 @@ function App() {
   const [showTop, setShowTop] = useState(false)
   const [statsStarted, setStatsStarted] = useState(false)
   const [barsAnimated, setBarsAnimated] = useState(false)
+  const [statsComplete, setStatsComplete] = useState(false)
   const [stats, setStats] = useState({ projects: 0, leetcode: 0, cgpa: 0, certs: 0 })
   const [contactForm, setContactForm] = useState({ name: '', email: '', cc: '', message: '' })
+  const [debugOpen, setDebugOpen] = useState(false)
+  const [debugStats, setDebugStats] = useState({ fps: 0, profile: 'desktop-cinematic', icons: 0 })
 
   const sectionIds = useMemo(() => ['about', 'skills', 'projects', 'education', 'contact'], [])
 
@@ -114,104 +118,215 @@ function App() {
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 
+    const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
+
     let rafId = 0
     let running = true
     let lastTime = 0
+    let time = 0
     let scrollY = window.scrollY
     let lastScrollY = window.scrollY
     let scrollVelocity = 0
     let mouseX = window.innerWidth / 2
     let mouseY = window.innerHeight / 2
+    let viewportCenterX = window.innerWidth / 2
+    let viewportCenterY = window.innerHeight / 2
+    let viewWidth = window.innerWidth
+    let viewHeight = window.innerHeight
+    let dpr = 1
+    let zoom = 1
+    let speedBoost = 1
+    let reducedMotion = reducedMotionQuery.matches
     let globalOpacityMult = 1
     let targetOpacityMult = 1
     const sectionOpacity = { hero: 1, about: 0.65, skills: 1.3, projects: 1.2, education: 0.55, contact: 0.8 }
+    let sectionElements = []
+    let bgGradient = null
     const isMobile = () => window.innerWidth < 768
+    const getMotionProfile = () => {
+      const mobile = isMobile()
+      if (reducedMotion) {
+        return {
+          iconCount: mobile ? 8 : 12,
+          zoomMax: 1.06,
+          speedBoostMax: 1.35,
+          blurMult: 0.35,
+          driftMult: 0.45,
+          repelMult: 0,
+          scrollParallaxMult: 0.35,
+        }
+      }
+      if (mobile) {
+        return {
+          iconCount: 12,
+          zoomMax: 1.12,
+          speedBoostMax: 1.6,
+          blurMult: 0.65,
+          driftMult: 0.7,
+          repelMult: 0,
+          scrollParallaxMult: 0.6,
+        }
+      }
+      return {
+        iconCount: 28,
+        zoomMax: 1.22,
+        speedBoostMax: 2.1,
+        blurMult: 0.75,
+        driftMult: 1,
+        repelMult: 1,
+        scrollParallaxMult: 1,
+      }
+    }
+    let motionProfile = getMotionProfile()
+    let motionProfileName = reducedMotion ? 'reduced-motion' : isMobile() ? 'mobile-smooth' : 'desktop-cinematic'
+    let targetIconCount = motionProfile.iconCount
+    let activeIconCount = motionProfile.iconCount
+    let minIconCount = Math.max(6, Math.floor(motionProfile.iconCount * 0.45))
+    let qualityCooldownUntil = 0
+    let imagesReady = false
+    let fpsFrameCount = 0
+    let fpsTimeAcc = 0
+    let fpsLastReport = 0
 
     const loadedImages = []
-    let particles = []
+    let orbitIcons = []
 
     const resize = () => {
-      canvas.width = window.innerWidth
-      canvas.height = window.innerHeight
+      viewWidth = window.innerWidth
+      viewHeight = window.innerHeight
+      dpr = Math.min(window.devicePixelRatio || 1, reducedMotion ? 1 : isMobile() ? 1.2 : 1.5)
+
+      canvas.width = Math.floor(viewWidth * dpr)
+      canvas.height = Math.floor(viewHeight * dpr)
+      canvas.style.width = `${viewWidth}px`
+      canvas.style.height = `${viewHeight}px`
+
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+
+      viewportCenterX = viewWidth / 2
+      viewportCenterY = viewHeight / 2
+      bgGradient = ctx.createLinearGradient(0, 0, 0, viewHeight)
+      bgGradient.addColorStop(0, 'rgba(8, 12, 28, 0.26)')
+      bgGradient.addColorStop(0.5, 'rgba(28, 16, 55, 0.1)')
+      bgGradient.addColorStop(1, 'rgba(6, 10, 22, 0.24)')
+      sectionElements = Array.from(document.querySelectorAll('section[id]'))
+      motionProfile = getMotionProfile()
+      motionProfileName = reducedMotion ? 'reduced-motion' : isMobile() ? 'mobile-smooth' : 'desktop-cinematic'
+      targetIconCount = motionProfile.iconCount
+      minIconCount = Math.max(6, Math.floor(targetIconCount * 0.45))
+      activeIconCount = Math.min(Math.max(activeIconCount, minIconCount), targetIconCount)
+      if (imagesReady && orbitIcons.length !== activeIconCount) {
+        initOrbitIcons()
+      }
     }
 
-    class IconParticle {
+    class OrbitIcon {
       constructor(index) {
         this.iconIndex = index % loadedImages.length
-        this.reset(true)
+        this.layerOrder = 1
+        this.reset()
       }
 
-      reset(initial = false) {
-        this.x = Math.random() * canvas.width
-        this.y = initial ? Math.random() * canvas.height : -80
-        this.size = 28 + Math.random() * 32
-        this.baseOpacity = 0.07 + Math.random() * 0.11
-        this.opacity = 0
+      reset() {
+        const layerRoll = Math.random()
+        this.layer = layerRoll < 0.34 ? 'background' : layerRoll < 0.78 ? 'midground' : 'foreground'
+        this.layerOrder = this.layer === 'background' ? 0 : this.layer === 'midground' ? 1 : 2
+        this.baseSize = this.layer === 'foreground' ? 38 + Math.random() * 24 : this.layer === 'midground' ? 28 + Math.random() * 20 : 22 + Math.random() * 16
+        this.depth = this.layer === 'foreground' ? 1.28 : this.layer === 'midground' ? 1.08 : 0.88
+        this.layerOpacity = this.layer === 'foreground' ? 0.95 : this.layer === 'midground' ? 0.78 : 0.48
+        this.baseBlur = this.layer === 'foreground' ? 0 : this.layer === 'midground' ? 0.8 : 1.5
+        this.speed =
+          this.layer === 'foreground'
+            ? 0.38 + Math.random() * 0.3
+            : this.layer === 'midground'
+              ? 0.22 + Math.random() * 0.2
+              : 0.1 + Math.random() * 0.14
+
+        this.angle = Math.random() * Math.PI * 2
+        this.angleOffset = Math.random() * Math.PI * 2
+        this.depthOffset = Math.random() * Math.PI * 2
+        this.depthFreq = 0.75 + Math.random() * 1.3
+        this.radiusX = (viewWidth * (this.layer === 'foreground' ? 0.22 : this.layer === 'midground' ? 0.32 : 0.42)) * (0.65 + Math.random() * 0.55)
+        this.radiusY = (viewHeight * (this.layer === 'foreground' ? 0.2 : this.layer === 'midground' ? 0.27 : 0.34)) * (0.6 + Math.random() * 0.55)
         this.rotation = Math.random() * Math.PI * 2
-        this.rotSpeed = (Math.random() - 0.5) * 0.008
-        this.vx = (Math.random() - 0.5) * 0.35
-        this.baseVy = 0.25 + Math.random() * 0.55
-        this.vy = this.baseVy
-        this.wobbleAmp = 20 + Math.random() * 30
-        this.wobbleFreq = 0.0008 + Math.random() * 0.001
-        this.wobbleOff = Math.random() * Math.PI * 2
-        this.time = Math.random() * 1000
-        this.parallaxFactor = 0.05 + Math.random() * 0.18
-        this.fadeInSpeed = 0.008 + Math.random() * 0.006
+        this.rotSpeed = (Math.random() - 0.5) * 0.01
+        this.repelX = 0
+        this.repelY = 0
+        this.x = 0
+        this.y = 0
+        this.scale = 0
+        this.opacity = 0
+        this.blur = 0
       }
 
       update(dt) {
-        this.time += dt
-        if (this.opacity < this.baseOpacity) {
-          this.opacity = Math.min(this.opacity + this.fadeInSpeed, this.baseOpacity)
-        }
+        const t = time * 0.001
+        const angle = this.angle + t * this.speed * speedBoost + this.angleOffset
+        const z = Math.sin(t * this.depthFreq + this.depthOffset)
+        const rawScale = (z + this.depth) / (2 * this.depth)
+        const layerScaleBoost = this.layer === 'foreground' ? 0.18 : this.layer === 'midground' ? 0.08 : -0.02
+        this.scale = Math.max(0.18, Math.min(rawScale + layerScaleBoost, 1.05))
+        this.opacity = Math.max(0.12, Math.min(this.scale * this.layerOpacity * globalOpacityMult, 1))
+        this.blur = ((1 - this.scale) * 3.8 + this.baseBlur) * motionProfile.blurMult
 
-        const wobble = Math.sin(this.time * this.wobbleFreq + this.wobbleOff) * this.wobbleAmp
-        const parallaxY = scrollY * this.parallaxFactor * -0.08
+        const orbitX = viewportCenterX + Math.cos(angle) * this.radiusX * zoom
+        const orbitY =
+          viewportCenterY +
+          Math.sin(angle * 0.92) * this.radiusY * zoom -
+          scrollY * 0.02 * this.scale * motionProfile.scrollParallaxMult
+        const driftX = Math.sin(t * 1.4 + this.depthOffset) * 8 * motionProfile.driftMult
+        const driftY = Math.cos(t * 1.1 + this.angleOffset) * 6 * motionProfile.driftMult
 
-        if (!isMobile()) {
-          const dx = this.x - mouseX
-          const dy = this.y - mouseY
+        let targetRepelX = 0
+        let targetRepelY = 0
+
+        if (!isMobile() && !reducedMotion) {
+          const dx = orbitX - mouseX
+          const dy = orbitY - mouseY
           const dist = Math.sqrt(dx * dx + dy * dy)
-          const repelRadius = 140
+          const repelRadius = this.layer === 'foreground' ? 170 : 130
           if (dist < repelRadius && dist > 0) {
-            const force = (1 - dist / repelRadius) * 0.9
-            this.x += (dx / dist) * force
-            this.y += (dy / dist) * force
+            const force = (1 - dist / repelRadius) * (this.layer === 'foreground' ? 22 : 14)
+            targetRepelX = (dx / dist) * force * motionProfile.repelMult
+            targetRepelY = (dy / dist) * force * motionProfile.repelMult
           }
         }
 
-        this.vy += scrollVelocity * 0.04 * this.parallaxFactor
-        this.vy = Math.max(0.1, Math.min(this.vy, 4))
-        this.vy += (this.baseVy - this.vy) * 0.06
+        const smooth = Math.min(0.2, dt * 0.01)
+        this.repelX += (targetRepelX - this.repelX) * smooth
+        this.repelY += (targetRepelY - this.repelY) * smooth
 
-        this.x += this.vx + wobble * 0.003
-        this.y += this.vy
+        this.x = orbitX + driftX + this.repelX
+        this.y = orbitY + driftY + this.repelY
         this.rotation += this.rotSpeed
-        this.renderY = this.y + parallaxY
-
-        if (this.y > canvas.height + 100 || this.x < -100 || this.x > canvas.width + 100) {
-          this.iconIndex = Math.floor(Math.random() * loadedImages.length)
-          this.reset(false)
-          this.x = Math.random() * canvas.width
-        }
       }
 
       draw() {
         const image = loadedImages[this.iconIndex]
         if (!image?.complete || image.naturalWidth === 0) return
+        const size = this.baseSize * this.scale
         ctx.save()
-        ctx.globalAlpha = this.opacity * globalOpacityMult
-        ctx.translate(this.x, this.renderY ?? this.y)
+        ctx.globalAlpha = this.opacity
+        if (this.layer === 'background' && this.blur > 0.3) {
+          ctx.filter = `blur(${this.blur.toFixed(2)}px)`
+        } else {
+          ctx.filter = 'none'
+        }
+        ctx.translate(this.x, this.y)
         ctx.rotate(this.rotation)
-        ctx.drawImage(image, -this.size / 2, -this.size / 2, this.size, this.size)
+        ctx.drawImage(image, -size / 2, -size / 2, size, size)
         ctx.restore()
       }
     }
 
-    const initParticles = () => {
-      const count = isMobile() ? 8 : 20
-      particles = Array.from({ length: count }, (_, index) => new IconParticle(index))
+    const initOrbitIcons = (nextCount = activeIconCount) => {
+      cancelAnimationFrame(rafId)
+      const count = Math.max(minIconCount, Math.min(nextCount, targetIconCount))
+      activeIconCount = count
+      orbitIcons = Array.from({ length: count }, (_, index) => new OrbitIcon(index))
+      if (import.meta.env.DEV) {
+        setDebugStats((prev) => ({ ...prev, profile: motionProfileName, icons: count }))
+      }
       if (running) {
         rafId = requestAnimationFrame(loop)
       }
@@ -221,14 +336,24 @@ function App() {
       scrollVelocity = window.scrollY - lastScrollY
       lastScrollY = window.scrollY
       scrollY = window.scrollY
-      const sectionElements = document.querySelectorAll('section[id]')
-      sectionElements.forEach((section) => {
-        const rect = section.getBoundingClientRect()
-        const inView = rect.top <= window.innerHeight * 0.45 && rect.bottom >= window.innerHeight * 0.45
-        if (inView) {
-          targetOpacityMult = sectionOpacity[section.id] ?? 1
-        }
-      })
+      speedBoost = Math.min(motionProfile.speedBoostMax, 1 + Math.abs(scrollVelocity) * 0.016)
+      zoom = Math.min(motionProfile.zoomMax, 1 + window.scrollY * 0.00012)
+      targetOpacityMult = scrollY < window.innerHeight * 0.35 ? sectionOpacity.hero : sectionOpacity[activeSectionRef.current] ?? 1
+    }
+
+    const onMotionPreferenceChange = () => {
+      reducedMotion = reducedMotionQuery.matches
+      motionProfile = getMotionProfile()
+      motionProfileName = reducedMotion ? 'reduced-motion' : isMobile() ? 'mobile-smooth' : 'desktop-cinematic'
+      targetIconCount = motionProfile.iconCount
+      minIconCount = Math.max(6, Math.floor(targetIconCount * 0.45))
+      activeIconCount = reducedMotion ? targetIconCount : Math.min(Math.max(activeIconCount, minIconCount), targetIconCount)
+      if (reducedMotion) {
+        window.removeEventListener('mousemove', onMouseMove)
+      } else {
+        window.addEventListener('mousemove', onMouseMove)
+      }
+      initOrbitIcons()
     }
 
     const onMouseMove = (event) => {
@@ -249,13 +374,50 @@ function App() {
     const loop = (timestamp) => {
       const dt = Math.min(timestamp - lastTime || 16, 50)
       lastTime = timestamp
+      time += dt
+      fpsFrameCount += 1
+      fpsTimeAcc += dt
       globalOpacityMult += (targetOpacityMult - globalOpacityMult) * 0.03
+      speedBoost += (1 - speedBoost) * 0.045
 
-      ctx.clearRect(0, 0, canvas.width, canvas.height)
-      particles.forEach((particle) => {
-        particle.update(dt)
-        particle.draw()
+      ctx.fillStyle = bgGradient
+      ctx.fillRect(0, 0, viewWidth, viewHeight)
+
+      orbitIcons.forEach((icon) => {
+        icon.update(dt)
       })
+      orbitIcons.forEach((icon) => {
+        if (icon.layerOrder === 0) icon.draw()
+      })
+      orbitIcons.forEach((icon) => {
+        if (icon.layerOrder === 1) icon.draw()
+      })
+      orbitIcons.forEach((icon) => {
+        if (icon.layerOrder === 2) icon.draw()
+      })
+
+      if (import.meta.env.DEV && timestamp - fpsLastReport > 450 && fpsTimeAcc > 0) {
+        const fps = Math.round((fpsFrameCount * 1000) / fpsTimeAcc)
+        setDebugStats({ fps, profile: motionProfileName, icons: activeIconCount })
+
+        if (!reducedMotion && timestamp > qualityCooldownUntil) {
+          const canReduce = activeIconCount > minIconCount
+          const canIncrease = activeIconCount < targetIconCount
+
+          if (fps < 50 && canReduce) {
+            initOrbitIcons(activeIconCount - 2)
+            qualityCooldownUntil = timestamp + 2200
+          } else if (fps > 58 && canIncrease) {
+            initOrbitIcons(activeIconCount + 1)
+            qualityCooldownUntil = timestamp + 2600
+          }
+        }
+
+        fpsLastReport = timestamp
+        fpsFrameCount = 0
+        fpsTimeAcc = 0
+      }
+
       if (running) {
         rafId = requestAnimationFrame(loop)
       }
@@ -264,8 +426,11 @@ function App() {
     resize()
     window.addEventListener('resize', resize)
     window.addEventListener('scroll', onScroll, { passive: true })
-    window.addEventListener('mousemove', onMouseMove)
+    if (!reducedMotion) {
+      window.addEventListener('mousemove', onMouseMove)
+    }
     document.addEventListener('visibilitychange', onVisibility)
+    reducedMotionQuery.addEventListener('change', onMotionPreferenceChange)
 
     let ready = 0
     iconSources.forEach((entry, index) => {
@@ -273,11 +438,17 @@ function App() {
       img.crossOrigin = 'anonymous'
       img.onload = () => {
         ready += 1
-        if (ready === iconSources.length) initParticles()
+        if (ready === iconSources.length) {
+          imagesReady = true
+          initOrbitIcons()
+        }
       }
       img.onerror = () => {
         ready += 1
-        if (ready === iconSources.length) initParticles()
+        if (ready === iconSources.length) {
+          imagesReady = true
+          initOrbitIcons()
+        }
       }
       img.src = entry.src
       loadedImages[index] = img
@@ -290,28 +461,70 @@ function App() {
       window.removeEventListener('scroll', onScroll)
       window.removeEventListener('mousemove', onMouseMove)
       document.removeEventListener('visibilitychange', onVisibility)
+      reducedMotionQuery.removeEventListener('change', onMotionPreferenceChange)
     }
   }, [])
 
   useEffect(() => {
-    const onScroll = () => {
+    if (!import.meta.env.DEV) return
+
+    const onKeyDown = (event) => {
+      if (event.shiftKey && event.code === 'KeyD') {
+        event.preventDefault()
+        setDebugOpen((prev) => !prev)
+      }
+    }
+
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [])
+
+  useEffect(() => {
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const sectionNodes = Array.from(document.querySelectorAll('section[id]'))
+    let ticking = false
+
+    const updateScrollState = () => {
       setScrolled(window.scrollY > 50)
       setShowTop(window.scrollY > 400)
+      if (reducedMotion || window.innerWidth < 768) return
+      sectionNodes.forEach((section) => {
+        const rect = section.getBoundingClientRect()
+        const progress = ((window.innerHeight - rect.top) / (window.innerHeight + rect.height)) * 2 - 1
+        section.style.setProperty('--section-parallax', `${Math.max(-16, Math.min(16, progress * 12)).toFixed(2)}px`)
+      })
     }
-    onScroll()
+
+    const onScroll = () => {
+      if (ticking) return
+      ticking = true
+      requestAnimationFrame(() => {
+        updateScrollState()
+        ticking = false
+      })
+    }
+
+    updateScrollState()
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
   useEffect(() => {
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (reducedMotion) {
+      document.querySelectorAll('.reveal').forEach((element) => element.classList.add('visible'))
+      return
+    }
+
     const revealObserver = new IntersectionObserver(
-      (entries) => {
+      (entries, observer) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             entry.target.classList.add('visible')
             entry.target.querySelectorAll('.stagger').forEach((element, index) => {
               element.style.transitionDelay = `${index * 0.1}s`
             })
+            observer.unobserve(entry.target)
           }
         })
       },
@@ -326,7 +539,11 @@ function App() {
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            setActiveSection(entry.target.id)
+            const nextSection = entry.target.id
+            if (nextSection !== activeSectionRef.current) {
+              activeSectionRef.current = nextSection
+              setActiveSection(nextSection)
+            }
           }
         })
       },
@@ -363,6 +580,102 @@ function App() {
   }, [])
 
   useEffect(() => {
+    const timeline = document.querySelector('.timeline-wrap')
+    if (!timeline) return
+    let ticking = false
+
+    const updateTimeline = () => {
+      const rect = timeline.getBoundingClientRect()
+      const progress = Math.max(0, Math.min(1, (window.innerHeight * 0.9 - rect.top) / (rect.height + window.innerHeight * 0.4)))
+      timeline.style.setProperty('--timeline-progress', progress.toFixed(3))
+    }
+
+    const onTimelineScroll = () => {
+      if (ticking) return
+      ticking = true
+      requestAnimationFrame(() => {
+        updateTimeline()
+        ticking = false
+      })
+    }
+
+    updateTimeline()
+    window.addEventListener('scroll', onTimelineScroll, { passive: true })
+    window.addEventListener('resize', updateTimeline)
+
+    return () => {
+      window.removeEventListener('scroll', onTimelineScroll)
+      window.removeEventListener('resize', updateTimeline)
+    }
+  }, [])
+
+  useEffect(() => {
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (reducedMotion || window.innerWidth < 768) return
+
+    const tiltNodes = document.querySelectorAll('.about-card, .project-card')
+    if (!tiltNodes.length) return
+
+    const handlers = []
+    tiltNodes.forEach((node) => {
+      const maxTilt = node.classList.contains('about-card') ? 8 : 10
+
+      const onMove = (event) => {
+        const rect = node.getBoundingClientRect()
+        const px = (event.clientX - rect.left) / rect.width
+        const py = (event.clientY - rect.top) / rect.height
+        const tiltX = ((0.5 - py) * maxTilt).toFixed(2)
+        const tiltY = ((px - 0.5) * maxTilt).toFixed(2)
+        const shiftX = ((px - 0.5) * 10).toFixed(2)
+        const shiftY = ((py - 0.5) * 8).toFixed(2)
+
+        node.style.setProperty('--tilt-x', `${tiltX}deg`)
+        node.style.setProperty('--tilt-y', `${tiltY}deg`)
+        node.style.setProperty('--glow-x', `${(px * 100).toFixed(2)}%`)
+        node.style.setProperty('--glow-y', `${(py * 100).toFixed(2)}%`)
+        node.style.setProperty('--parallax-x', `${shiftX}px`)
+        node.style.setProperty('--parallax-y', `${shiftY}px`)
+      }
+
+      const onLeave = () => {
+        node.style.setProperty('--tilt-x', '0deg')
+        node.style.setProperty('--tilt-y', '0deg')
+        node.style.setProperty('--parallax-x', '0px')
+        node.style.setProperty('--parallax-y', '0px')
+        node.style.setProperty('--glow-x', '50%')
+        node.style.setProperty('--glow-y', '50%')
+      }
+
+      node.addEventListener('mousemove', onMove)
+      node.addEventListener('mouseleave', onLeave)
+      handlers.push({ node, onMove, onLeave })
+    })
+
+    return () => {
+      handlers.forEach(({ node, onMove, onLeave }) => {
+        node.removeEventListener('mousemove', onMove)
+        node.removeEventListener('mouseleave', onLeave)
+      })
+    }
+  }, [])
+
+  useEffect(() => {
+    const button = document.querySelector('.contact-form button')
+    if (!button) return
+
+    const onClick = (event) => {
+      const rect = button.getBoundingClientRect()
+      button.style.setProperty('--ripple-x', `${event.clientX - rect.left}px`)
+      button.style.setProperty('--ripple-y', `${event.clientY - rect.top}px`)
+      button.classList.remove('ripple-active')
+      requestAnimationFrame(() => button.classList.add('ripple-active'))
+    }
+
+    button.addEventListener('click', onClick)
+    return () => button.removeEventListener('click', onClick)
+  }, [])
+
+  useEffect(() => {
     if (!statsStarted) return
     const targets = { projects: 3, leetcode: 100, cgpa: 8, certs: 3 }
     const duration = 1800
@@ -382,6 +695,8 @@ function App() {
       })
       if (progress < 1) {
         frameId = requestAnimationFrame(tick)
+      } else {
+        setStatsComplete(true)
       }
     }
     frameId = requestAnimationFrame(tick)
@@ -435,8 +750,8 @@ function App() {
             ))}
           </nav>
 
-          <a className="btn-cv" href="/assets/CV_Sachin_Sharma.pdf" download>
-            Download CV ↓
+          <a className="btn-cv" href="/assets/CV_Sachin_Sharma.pdf" target="_blank" rel="noopener noreferrer">
+            View CV ↗
           </a>
 
           <button
@@ -494,7 +809,7 @@ function App() {
 
           <section id="about" className="section reveal">
             <div className="container about-grid">
-              <article className="about-card stagger">
+              <article className="about-card stagger tilt-card">
                 <h2>About</h2>
                 <p>
                   I&apos;m a Full-Stack Developer specialising in the <span>MERN stack</span>, studying Computer Science at
@@ -510,19 +825,19 @@ function App() {
               </article>
 
               <div className="stats-grid stagger">
-                <article className="stat-card">
+                <article className={`stat-card ${statsComplete ? 'done' : ''}`}>
                   <h3>{stats.projects}+</h3>
                   <p>Projects Built</p>
                 </article>
-                <article className="stat-card">
+                <article className={`stat-card ${statsComplete ? 'done' : ''}`}>
                   <h3>{stats.leetcode}+</h3>
                   <p>LeetCode Problems</p>
                 </article>
-                <article className="stat-card">
+                <article className={`stat-card ${statsComplete ? 'done' : ''}`}>
                   <h3>{stats.cgpa}</h3>
                   <p>CGPA at LPU</p>
                 </article>
-                <article className="stat-card">
+                <article className={`stat-card ${statsComplete ? 'done' : ''}`}>
                   <h3>{stats.certs}</h3>
                   <p>Certifications</p>
                 </article>
@@ -580,7 +895,7 @@ function App() {
             <div className="container">
               <h2 className="stagger">Projects</h2>
               <div className="projects-grid">
-                <article className="project-card stagger">
+                <article className="project-card stagger tilt-card">
                   <span className="project-date">Aug '25</span>
                   <h3>E-Lib — Digital Library Management System</h3>
                   <p>
@@ -603,7 +918,7 @@ function App() {
                   </div>
                 </article>
 
-                <article className="project-card stagger">
+                <article className="project-card stagger tilt-card">
                   <span className="project-date">Mar '25</span>
                   <h3>Akhada Analytics — Full-Stack Fitness Tracking Platform</h3>
                   <p>
@@ -630,7 +945,7 @@ function App() {
                   </div>
                 </article>
 
-                <article className="project-card stagger">
+                <article className="project-card stagger tilt-card">
                   <span className="project-date">Feb '25</span>
                   <h3>Portfolio — Personal Developer Portfolio</h3>
                   <p>
@@ -752,37 +1067,22 @@ function App() {
                 </a>
 
                 <form className="contact-form" onSubmit={handleContactSubmit}>
-                  <input
-                    type="text"
-                    name="name"
-                    placeholder="Your Name"
-                    value={contactForm.name}
-                    onChange={handleContactChange}
-                    required
-                  />
-                  <input
-                    type="email"
-                    name="email"
-                    placeholder="Your Email"
-                    value={contactForm.email}
-                    onChange={handleContactChange}
-                    required
-                  />
-                  <input
-                    type="email"
-                    name="cc"
-                    placeholder="CC Email (optional)"
-                    value={contactForm.cc}
-                    onChange={handleContactChange}
-                  />
-                  <textarea
-                    name="message"
-                    placeholder="Your Message"
-                    value={contactForm.message}
-                    onChange={handleContactChange}
-                    rows={4}
-                    required
-                  />
+                  <div className="field-wrap">
+                    <input id="contact-name" type="text" name="name" placeholder=" " value={contactForm.name} onChange={handleContactChange} required />
+                    <label htmlFor="contact-name">Your Name</label>
+                  </div>
+                  <div className="field-wrap">
+                    <input id="contact-email" type="email" name="email" placeholder=" " value={contactForm.email} onChange={handleContactChange} required />
+                    <label htmlFor="contact-email">Your Email</label>
+                  </div>
+                  <div className="field-wrap">
+                    <input id="contact-cc" type="email" name="cc" placeholder=" " value={contactForm.cc} onChange={handleContactChange} />
+                    <label htmlFor="contact-cc">CC Email (optional)</label>
+                  </div>
+                  <div className="field-wrap">
+                    <textarea id="contact-message" name="message" placeholder=" " value={contactForm.message} onChange={handleContactChange} rows={4} required />
+                    <label htmlFor="contact-message">Your Message</label>
+                  </div>
                   <button type="submit">Send Email</button>
                 </form>
 
@@ -806,7 +1106,7 @@ function App() {
         </main>
 
         <footer>
-          Sachin Kumar · 2025
+          Sachin Kumar · 2026
         </footer>
 
         <button
@@ -816,6 +1116,16 @@ function App() {
         >
           ↑
         </button>
+
+        {import.meta.env.DEV && debugOpen && (
+          <aside className="debug-hud" aria-live="polite">
+            <h4>Motion Debug</h4>
+            <p>FPS: {debugStats.fps}</p>
+            <p>Profile: {debugStats.profile}</p>
+            <p>Icons: {debugStats.icons}</p>
+            <small>Toggle: Shift + D</small>
+          </aside>
+        )}
       </div>
     </>
   )
