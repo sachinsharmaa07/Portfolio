@@ -6,8 +6,8 @@ const educationData = [
     degree: 'B.Tech — Computer Science & Engineering',
     institution: 'Lovely Professional University',
     location: 'Punjab, India',
-    period: '2022 – Present',
-    cgpa: '8.0 / 10',
+    period: '2023 – Present',
+    cgpa: '8.1 / 10',
     slug: 'lpu-btech',
     highlights: [
       'Specialization in Cloud Computing & DevOps',
@@ -18,8 +18,8 @@ const educationData = [
   },
   {
     degree: 'Senior Secondary — Science (PCM)',
-    institution: 'Delhi Public School',
-    location: 'India',
+    institution: 'BSF Senior Secondary School, Jammu',
+    location: 'Jammu , J&K',
     period: '2020 – 2022',
     cgpa: '88%',
     slug: 'dps-12th',
