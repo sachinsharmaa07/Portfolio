@@ -79,17 +79,17 @@ function AchievementCard({ item, index }) {
             <div className="traffic-light traffic-yellow" />
             <div className="traffic-light traffic-green" />
           </div>
-          <span className="flex-1 text-center text-xs" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-muted)' }}>
+          <span className="flex-1 text-center macos-path">
             ~/achievements/{item.slug}
           </span>
           <span className="text-[10px] px-2 py-0.5 rounded tracking-widest uppercase"
-            style={{ background: `rgba(123,92,250,0.1)`, color: 'var(--color-violet)', fontFamily: 'var(--font-mono)' }}>
+            style={{ background: 'rgba(var(--color-violet-rgb),0.16)', color: 'var(--color-violet)', fontFamily: 'var(--font-mono)' }}>
             {item.category}
           </span>
         </div>
 
         {/* Body */}
-        <div className="p-5 md:p-6 flex flex-col gap-4">
+        <div className="macos-body flex flex-col gap-4">
           {/* Icon + Stat row */}
           <div className="flex items-center justify-between">
             <span className="text-3xl">{item.icon}</span>
@@ -129,7 +129,7 @@ export default function AchievementsSection() {
       <div className="pointer-events-none absolute top-1/2 right-0 w-[400px] h-[400px] rounded-full opacity-10 blur-3xl -translate-y-1/2"
         style={{ background: 'radial-gradient(circle, var(--color-magenta), transparent)' }} />
 
-      <div className="relative max-w-7xl mx-auto">
+      <div className="relative content-shell">
         <ScrollReveal>
           <div className="accent-label mb-4 flex items-center gap-3">
             <span className="inline-block w-8 h-[1px]" style={{ background: 'var(--color-cyan)' }} />

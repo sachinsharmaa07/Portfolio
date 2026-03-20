@@ -46,19 +46,19 @@ function EduCard({ edu, index }) {
             <div className="traffic-light traffic-yellow" />
             <div className="traffic-light traffic-green" />
           </div>
-          <span className="flex-1 text-center text-xs" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-muted)' }}>
+          <span className="flex-1 text-center macos-path">
             ~/education/{edu.slug}
           </span>
-          <span className="text-xs px-2 py-0.5 rounded" style={{ background: 'rgba(0,255,194,0.08)', color: edu.accent, fontFamily: 'var(--font-mono)' }}>
+          <span className="text-xs px-2 py-0.5 rounded" style={{ background: 'rgba(var(--color-cyan-rgb),0.12)', color: edu.accent, fontFamily: 'var(--font-mono)' }}>
             {edu.cgpa}
           </span>
         </div>
 
         {/* Body */}
-        <div className="p-6 md:p-7">
+        <div className="macos-body">
           {/* Period badge */}
           <span className="inline-flex items-center px-2.5 py-1 mb-4 text-[10px] tracking-widest uppercase rounded-full"
-            style={{ fontFamily: 'var(--font-mono)', background: `rgba(123,92,250,0.1)`, color: 'var(--color-violet)', border: '1px solid rgba(123,92,250,0.2)' }}>
+            style={{ fontFamily: 'var(--font-mono)', background: 'rgba(var(--color-violet-rgb),0.16)', color: 'var(--color-violet)', border: '1px solid rgba(var(--color-violet-rgb),0.28)' }}>
             {edu.period}
           </span>
 
@@ -90,7 +90,7 @@ function EduCard({ edu, index }) {
 export default function EducationSection() {
   return (
     <section id="education" className="section-padding" style={{ background: 'var(--color-void)' }}>
-      <div className="max-w-7xl mx-auto">
+      <div className="content-shell">
         <ScrollReveal>
           <div className="accent-label mb-4 flex items-center gap-3">
             <span className="inline-block w-8 h-[1px]" style={{ background: 'var(--color-cyan)' }} />

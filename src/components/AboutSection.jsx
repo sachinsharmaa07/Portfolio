@@ -53,7 +53,7 @@ export default function AboutSection() {
 
   return (
     <section id="about" className="section-padding" style={{ background: 'var(--color-void)' }}>
-      <div className="max-w-7xl mx-auto">
+      <div className="content-shell">
         {/* Section Label */}
         <ScrollReveal>
           <div className="accent-label mb-4 flex items-center gap-3">
@@ -120,13 +120,13 @@ export default function AboutSection() {
                   <div className="traffic-light traffic-yellow" />
                   <div className="traffic-light traffic-green" />
                 </div>
-                <span className="ml-3 text-xs" style={{ color: 'var(--color-muted)', fontFamily: 'var(--font-mono)' }}>
+                <span className="ml-3 macos-path">
                   ~/sachin/profile.js
                 </span>
               </div>
 
               {/* Terminal Body */}
-              <div className="p-5 text-sm leading-7" style={{ fontFamily: 'var(--font-mono)' }}>
+              <div className="macos-body">
                 {terminalLines.map((line, i) => (
                   <motion.div
                     key={i}

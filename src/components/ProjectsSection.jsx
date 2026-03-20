@@ -70,7 +70,7 @@ function MacOSProjectCard({ project }) {
           <div className="traffic-light traffic-yellow" />
           <div className="traffic-light traffic-green" />
         </div>
-        <span className="flex-1 text-center text-xs" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-muted)' }}>
+        <span className="flex-1 text-center macos-path">
           ~/projects/{project.slug}
         </span>
         <div className="flex gap-2">
@@ -104,16 +104,16 @@ function MacOSProjectCard({ project }) {
       </div>
 
       {/* Card Body */}
-      <div className="p-6 md:p-7">
+      <div className="macos-body">
         {/* Featured badge */}
         {project.featured && (
           <span
             className="inline-flex items-center gap-1.5 px-2.5 py-1 mb-4 text-[10px] tracking-widest uppercase rounded-full"
             style={{
               fontFamily: 'var(--font-mono)',
-              background: 'rgba(0,255,194,0.1)',
+              background: 'rgba(var(--color-cyan-rgb),0.12)',
               color: 'var(--color-cyan)',
-              border: '1px solid rgba(0,255,194,0.2)',
+              border: '1px solid rgba(var(--color-cyan-rgb),0.26)',
             }}
           >
             ◆ FEATURED
@@ -130,19 +130,19 @@ function MacOSProjectCard({ project }) {
           </h3>
           <span
             className="text-[10px] px-2 py-0.5 rounded"
-            style={{ background: 'rgba(123,92,250,0.15)', color: 'var(--color-violet)', fontFamily: 'var(--font-mono)' }}
+            style={{ background: 'rgba(var(--color-violet-rgb),0.2)', color: 'var(--color-violet)', fontFamily: 'var(--font-mono)' }}
           >
             {project.date}
           </span>
         </div>
-        <p className="text-sm mb-3" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-violet)' }}>
+        <p className="text-sm mb-3" style={{ color: 'var(--color-violet)' }}>
           {project.subtitle}
         </p>
 
         {/* Description */}
         <p
           className="text-base leading-relaxed mb-5"
-          style={{ color: 'var(--color-muted)', fontFamily: 'var(--font-mono)' }}
+          style={{ color: 'var(--color-muted)' }}
         >
           {project.description}
         </p>
@@ -152,7 +152,7 @@ function MacOSProjectCard({ project }) {
           {project.highlights.map((h, j) => (
             <li key={j} className="flex items-start gap-2 text-sm" style={{ color: 'var(--color-muted)' }}>
               <span style={{ color: 'var(--color-cyan)', marginTop: '2px', flexShrink: 0 }}>▸</span>
-              <span style={{ fontFamily: 'var(--font-mono)' }}>{h}</span>
+              <span>{h}</span>
             </li>
           ))}
         </ul>
@@ -166,16 +166,16 @@ function MacOSProjectCard({ project }) {
               style={{
                 fontFamily: 'var(--font-mono)',
                 background: 'rgba(255,255,255,0.04)',
-                border: '1px solid rgba(255,255,255,0.08)',
+                border: '1px solid rgba(255,255,255,0.11)',
                 color: 'var(--color-muted)',
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.color = 'var(--color-cyan)';
-                e.currentTarget.style.borderColor = 'rgba(0,255,194,0.3)';
+                e.currentTarget.style.borderColor = 'rgba(var(--color-cyan-rgb),0.36)';
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.color = 'var(--color-muted)';
-                e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)';
+                e.currentTarget.style.borderColor = 'rgba(255,255,255,0.11)';
               }}
             >
               {t}
@@ -190,7 +190,7 @@ function MacOSProjectCard({ project }) {
 export default function ProjectsSection() {
   return (
     <section id="work" className="section-padding" style={{ background: 'var(--color-void)' }}>
-      <div className="max-w-7xl mx-auto">
+      <div className="content-shell">
         {/* Section Label */}
         <ScrollReveal>
           <div className="accent-label mb-4 flex items-center gap-3">

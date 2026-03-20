@@ -33,14 +33,14 @@ export default function Navbar() {
         animate={{ y: 0 }}
         transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
         style={{
-          background: scrolled ? 'rgba(4, 4, 7, 0.85)' : 'rgba(4, 4, 7, 0.4)',
+          background: scrolled ? 'rgba(7, 9, 20, 0.88)' : 'rgba(7, 9, 20, 0.48)',
           backdropFilter: 'blur(24px)',
           WebkitBackdropFilter: 'blur(24px)',
-          borderBottom: `1px solid ${scrolled ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.04)'}`,
+          borderBottom: `1px solid ${scrolled ? 'rgba(255,255,255,0.13)' : 'rgba(255,255,255,0.08)'}`,
           transition: 'background 0.4s, border-color 0.4s',
         }}
       >
-        <div className="max-w-7xl mx-auto px-6 lg:px-12 h-full flex items-center justify-between">
+        <div className="content-shell h-full flex items-center justify-between">
           {/* Monogram */}
           <a href="#" className="flex items-center gap-1.5 no-underline">
             <span
@@ -63,10 +63,10 @@ export default function Navbar() {
               <a
                 key={link.label}
                 href={link.href}
-                className="relative text-base tracking-wide no-underline group"
+                className="relative text-base tracking-wide no-underline group transition-colors duration-200"
                 style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-muted)' }}
-                onMouseEnter={(e) => (e.target.style.color = 'var(--color-text)')}
-                onMouseLeave={(e) => (e.target.style.color = 'var(--color-muted)')}
+                onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--color-text)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--color-muted)'; }}
               >
                 {link.label}
                 <span
@@ -94,7 +94,7 @@ export default function Navbar() {
         {menuOpen && (
           <motion.div
             className="fixed inset-0 z-40 flex flex-col items-center justify-center gap-8"
-            style={{ background: 'rgba(4, 4, 7, 0.97)' }}
+            style={{ background: 'rgba(7, 9, 20, 0.97)' }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}

@@ -25,7 +25,7 @@ const skillGroups = [
     title: 'Concepts',
     file: 'concepts.sh',
     skills: ['DSA', 'REST APIs', 'JWT Auth', 'OAuth 2.0', 'CI/CD', 'Cloud Computing', 'MVC Architecture'],
-    accent: '#28C840',
+    accent: '#70e59b',
   },
 ];
 
@@ -65,20 +65,17 @@ function MacOSSkillCard({ group, index }) {
         {/* macOS Titlebar */}
         <div className="macos-titlebar">
           <div className="flex gap-1.5">
-            <div className="w-2.5 h-2.5 rounded-full" style={{ background: '#FF5F57' }} />
-            <div className="w-2.5 h-2.5 rounded-full" style={{ background: '#FEBC2E' }} />
-            <div className="w-2.5 h-2.5 rounded-full" style={{ background: '#28C840' }} />
+            <div className="traffic-light traffic-red" />
+            <div className="traffic-light traffic-yellow" />
+            <div className="traffic-light traffic-green" />
           </div>
-          <span
-            className="flex-1 text-center text-xs"
-            style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-muted)' }}
-          >
+          <span className="flex-1 text-center macos-path">
             {group.file}
           </span>
         </div>
 
         {/* Content */}
-        <div className="p-5">
+        <div className="macos-body">
           <div className="flex items-center gap-2 mb-4">
             <span
               className="w-2 h-2 rounded-full"
@@ -111,7 +108,7 @@ export default function SkillsSection() {
         style={{ background: 'radial-gradient(circle, var(--color-violet), transparent)' }}
       />
 
-      <div className="relative max-w-7xl mx-auto">
+      <div className="relative content-shell">
         {/* Section Label */}
         <ScrollReveal>
           <div className="accent-label mb-4 flex items-center gap-3">

@@ -26,7 +26,7 @@ export default function ContactSection() {
 
   const inputStyle = {
     background: 'rgba(255,255,255,0.03)',
-    border: '1px solid rgba(255,255,255,0.08)',
+    border: '1px solid rgba(255,255,255,0.12)',
     color: 'var(--color-text)',
     fontFamily: 'var(--font-mono)',
     fontSize: '16px',
@@ -36,11 +36,11 @@ export default function ContactSection() {
 
   const focusStyle = (e) => {
     e.target.style.borderColor = 'var(--color-cyan)';
-    e.target.style.boxShadow = '0 0 20px rgba(0,255,194,0.1)';
+    e.target.style.boxShadow = '0 0 20px rgba(var(--color-cyan-rgb),0.18)';
   };
 
   const blurStyle = (e) => {
-    e.target.style.borderColor = 'rgba(255,255,255,0.08)';
+    e.target.style.borderColor = 'rgba(255,255,255,0.12)';
     e.target.style.boxShadow = 'none';
   };
 
@@ -52,7 +52,7 @@ export default function ContactSection() {
         style={{ background: 'linear-gradient(90deg, transparent, var(--color-cyan), var(--color-violet), transparent)' }}
       />
 
-      <div className="max-w-7xl mx-auto">
+      <div className="content-shell">
         <ScrollReveal>
           <div className="text-center mb-16">
             <div className="accent-label mb-4 flex items-center justify-center gap-3">
@@ -112,7 +112,7 @@ export default function ContactSection() {
               <motion.button
                 type="submit"
                 disabled={sending}
-                className="w-full inline-flex items-center justify-center gap-2 py-4 text-base font-semibold rounded-lg transition-all duration-300"
+                className="w-full inline-flex items-center justify-center gap-2 py-4 text-base font-semibold rounded-lg transition-all duration-300 btn-neon"
                 style={{
                   background: 'var(--color-cyan)',
                   color: 'var(--color-void)',
@@ -138,18 +138,9 @@ export default function ContactSection() {
                   href={href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group flex items-center gap-4 p-4 rounded-xl no-underline transition-all duration-300"
-                  style={{ background: 'var(--color-card)', border: '1px solid rgba(255,255,255,0.08)' }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.borderColor = 'rgba(0,255,194,0.3)';
-                    e.currentTarget.style.boxShadow = '0 0 20px rgba(0,255,194,0.05)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)';
-                    e.currentTarget.style.boxShadow = 'none';
-                  }}
+                  className="group flex items-center gap-4 p-4 rounded-xl no-underline transition-all duration-300 contact-link-card"
                 >
-                  <div className="p-3 rounded-lg" style={{ background: 'rgba(0,255,194,0.06)' }}>
+                  <div className="p-3 rounded-lg contact-link-icon">
                     <Icon size={20} style={{ color: 'var(--color-cyan)' }} />
                   </div>
                   <div>

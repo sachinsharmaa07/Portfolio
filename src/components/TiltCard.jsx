@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 
-export default function TiltCard({ children, className = '', glowColor = 'rgba(0, 255, 194, 0.12)' }) {
+export default function TiltCard({ children, className = '', glowColor = 'rgba(var(--color-cyan-rgb),0.16)' }) {
   const ref = useRef(null);
   const [transform, setTransform] = useState({ rotateX: 0, rotateY: 0 });
   const [glowPosition, setGlowPosition] = useState({ x: 50, y: 50 });
@@ -50,7 +50,7 @@ export default function TiltCard({ children, className = '', glowColor = 'rgba(0
       <div
         className="pointer-events-none absolute inset-0 z-0 rounded-xl opacity-60"
         style={{
-          background: `radial-gradient(400px circle at ${glowPosition.x}% ${glowPosition.y}%, rgba(0,255,194,0.08), transparent 40%)`,
+          background: `radial-gradient(400px circle at ${glowPosition.x}% ${glowPosition.y}%, rgba(var(--color-cyan-rgb),0.1), transparent 40%)`,
         }}
       />
       {children}
