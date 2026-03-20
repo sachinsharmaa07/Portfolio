@@ -3,13 +3,13 @@ import ScrollReveal from './ScrollReveal';
 
 const achievements = [
   {
-    title: 'LeetCode 100+ Problems',
+    title: 'LeetCode 150+ Problems',
     slug: 'leetcode-streak',
     category: 'DSA',
-    description: 'Solved 100+ problems on LeetCode covering arrays, trees, graphs, dynamic programming, and more in C++.',
+    description: 'Solved 150+ problems on LeetCode covering arrays, trees, graphs, dynamic programming, and more in C++.',
     icon: '⚡',
     accent: 'var(--color-cyan)',
-    stat: '100+',
+    stat: '150+',
     statLabel: 'Problems Solved',
   },
   {
@@ -33,13 +33,13 @@ const achievements = [
     statLabel: 'Uptime',
   },
   {
-    title: 'CGPA 8.0 at LPU',
+    title: 'CGPA 8.1 at LPU',
     slug: 'academic-excellence',
     category: 'Academic',
-    description: 'Maintaining a strong 8.0 CGPA in B.Tech Computer Science at Lovely Professional University while working on multiple production projects.',
+    description: 'Maintaining a strong 8.1 CGPA in B.Tech Computer Science at Lovely Professional University while working on multiple production projects.',
     icon: '🎓',
     accent: 'var(--color-magenta)',
-    stat: '8.0',
+    stat: '8.1',
     statLabel: 'CGPA',
   },
   {

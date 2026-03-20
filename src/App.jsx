@@ -4,6 +4,7 @@ import AboutSection from './components/AboutSection';
 import ProjectsSection from './components/ProjectsSection';
 import SkillsSection from './components/SkillsSection';
 import EducationSection from './components/EducationSection';
+import CertificatesSection from './components/CertificatesSection';
 import AchievementsSection from './components/AchievementsSection';
 import ContactSection from './components/ContactSection';
 
@@ -14,11 +15,12 @@ export default function App() {
       <Navbar />
       <main>
         <HeroSection />
-        <ProjectsSection />
-        <SkillsSection />
-        <EducationSection />
-        <AchievementsSection />
         <AboutSection />
+        <EducationSection />
+        <CertificatesSection />
+        <SkillsSection />
+        <ProjectsSection />
+        <AchievementsSection />
         <ContactSection />
       </main>
    

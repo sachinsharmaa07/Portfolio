@@ -263,7 +263,7 @@ export default function HeroSection() {
               </motion.div>
 
               <motion.div variants={childVariants} className="hero-stat-grid">
-                <GlassStat value="100+" label="LeetCode" />
+                <GlassStat value="150+" label="LeetCode" />
                 <GlassStat value="MERN" label="Production" />
                 <GlassStat value="24/7" label="Builder Mode" />
               </motion.div>

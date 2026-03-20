@@ -3,10 +3,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { HiMenuAlt4, HiX } from 'react-icons/hi';
 
 const navLinks = [
-  { label: 'Work', href: '#work' },
-  { label: 'Skills', href: '#skills' },
-  { label: 'Education', href: '#education' },
   { label: 'About', href: '#about' },
+  { label: 'Education', href: '#education' },
+  { label: 'Certificates', href: '#certificates' },
+  { label: 'Skills', href: '#skills' },
+  { label: 'Work', href: '#work' },
+  { label: 'Achievements', href: '#achievements' },
   { label: 'Contact', href: '#contact' },
 ];
 

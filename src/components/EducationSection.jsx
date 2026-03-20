@@ -19,7 +19,7 @@ const educationData = [
   {
     degree: 'Senior Secondary — Science (PCM)',
     institution: 'BSF Senior Secondary School, Jammu',
-    location: 'Jammu , J&K',
+    location: 'Jammu, J&K',
     period: '2020 – 2022',
     cgpa: '88%',
     slug: 'dps-12th',

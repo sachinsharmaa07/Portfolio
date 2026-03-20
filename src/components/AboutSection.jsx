@@ -32,15 +32,15 @@ function Counter({ target, suffix = '', duration = 2000 }) {
 
 const stats = [
   { value: 3, suffix: '+', label: 'Production Projects' },
-  { value: 100, suffix: '+', label: 'LeetCode Problems' },
-  { value: 8.0, suffix: '', label: 'CGPA at LPU' },
+  { value: 150, suffix: '+', label: 'LeetCode Problems' },
+  { value: 8.1, suffix: '', label: 'CGPA at LPU' },
 ];
 
 const terminalLines = [
   { prefix: 'const', text: ' sachin = {', color: 'var(--color-violet)' },
   { prefix: '  role:', text: ' "Full-Stack MERN Developer",', color: 'var(--color-cyan)' },
   { prefix: '  stack:', text: ' ["React", "Node", "Express", "MongoDB"],', color: 'var(--color-cyan)' },
-  { prefix: '  dsa:', text: ' "C++ | 100+ LeetCode",', color: 'var(--color-cyan)' },
+  { prefix: '  dsa:', text: ' "C++ | 150+ LeetCode",', color: 'var(--color-cyan)' },
   { prefix: '  learning:', text: ' ["AWS", "Docker", "DevOps"],', color: 'var(--color-cyan)' },
   { prefix: '  education:', text: ' "B.Tech CS @ LPU",', color: 'var(--color-cyan)' },
   { prefix: '  mindset:', text: ' "Build → Ship → Iterate"', color: 'var(--color-magenta)' },
@@ -104,7 +104,7 @@ export default function AboutSection() {
                 className="text-base leading-relaxed"
                 style={{ color: 'var(--color-muted)', fontFamily: 'var(--font-mono)' }}
               >
-                Currently deepening my DSA skills in C++ (100+ LeetCode problems) while exploring Cloud Computing with AWS,
+                Currently deepening my DSA skills in C++ (150+ LeetCode problems) while exploring Cloud Computing with AWS,
                 Docker, and DevOps tooling. I believe in the power of iterative building — ship fast, gather feedback, optimize relentlessly.
               </p>
             </ScrollReveal>
